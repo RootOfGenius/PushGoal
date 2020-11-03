@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "__MSG_extName__",
+  "homepage_url": "http://localhost:8080/",
+  "description": "Push Goal - Support Update OKR so fast",
+  "default_locale": "en",
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  "permissions": [
+    "<all_urls>",
+    "*://*/*",
+    "https://goal.sun-asterisk.vn/"
+  ],
+  "icons": {
+    "16": "icons/icon_16.png",
+    "48": "icons/icon_48.png",
+    "128": "icons/icon_128.png"
+  },
+  "devtools_page": "devtools.html",
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_title": "__MSG_extName__",
+    "default_icon": {
+      "19": "icons/icon_16.png",
+      "38": "icons/icon_32.png"
+    }
+  }
+}
