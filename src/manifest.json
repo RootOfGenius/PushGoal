@@ -6,8 +6,6 @@
   "default_locale": "en",
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "permissions": [
-    "<all_urls>",
-    "*://*/*",
     "https://goal.sun-asterisk.vn/"
   ],
   "icons": {
