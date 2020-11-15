@@ -70,7 +70,7 @@
               <p class="text-success ml-2">Đã cập nhật</p>
               <p class="text-info ml-2">Cập nhật dở</p>
             </b-row>
-            <b-row>
+            <b-row class="mb-4">
               <span v-for="(item, index) in objectives" class="w-100" :key="index">
                 <zoom-center-transition>
                   <b-button
@@ -458,7 +458,7 @@ export default {
 <style>
 html {
   width: 600px;
-  height: 600px;
+  height: auto;
 }
 .block {
   background-color: #777;
