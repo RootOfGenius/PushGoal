@@ -26,5 +26,6 @@ export default {
   loadUserDetail: (userId, token) => request(API.loadUserDetail(userId), token),
   updateOkr: (okrId, data, token) => request(API.updateOkr(okrId, data), token),
   remainUnChange: (okrId, data, token) => request(API.remainUnChange(okrId, data), token),
-  loadChildObj: (objId, token) => request(API.loadChildObj(objId), token)
+  loadChildObj: (objId, token) => request(API.loadChildObj(objId), token),
+  refreshToken: (data) => request(API.refreshToken(data), null)
 }

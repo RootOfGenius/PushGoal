@@ -24,5 +24,9 @@ export default {
   loadUserDetail: (userId) => ({
     method: 'GET',
     url: '/users/' + userId
+  }),
+  refreshToken: (data) => ({
+    method: 'POST',
+    data: data
   })
 }
