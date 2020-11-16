@@ -26,10 +26,6 @@
               align="center"
               placeholder="Mật khẩu"
             />
-            <b-badge class="ml-4"
-              >Chúng tôi không lưu trữ bất cứ thông tin tài khoản WSM
-              nào!</b-badge
-            >
             <button
               type="button"
               class="submit mt-2"
@@ -37,6 +33,14 @@
               align="center"
             >
               Đăng Nhập
+            </button>
+            <button
+              type="button"
+              class="submit submit-goal mt-2"
+              @click="loadGoalAuth()"
+              align="center"
+            >
+              Đăng Nhập with SGoal chỉ với 1 click
             </button>
           </div>
         </div>
@@ -174,6 +178,7 @@
 import Storage from './storage'
 import Service from '../services/index'
 import countTo from 'vue-count-to'
+import jwtDecode from 'jwt-decode'
 import { ZoomCenterTransition } from 'vue2-transitions'
 
 export default {
@@ -187,24 +192,36 @@ export default {
     overlayAll: false,
     err: null,
     objectives: [],
-    overlayOkr: false
+    overlayOkr: false,
+    cookie: {
+      access_token: null,
+      refresh_token: null
+    }
   }),
   computed: {},
   created () {
-    this.overlayAll = true
   },
   mounted () {
     this.initAuth()
-    if (this.auth) {
-      this.loadOkr()
+    if (!this.auth) {
+      this.toast(
+        'info',
+        'Chúng tôi sẽ không lưu thông tin tài khoản wsm!',
+        'PushGoal',
+        'b-toaster-top-center'
+      )
     }
   },
   methods: {
     initAuth: function () {
+      this.overlayAll = true
       if (Storage.get('auth')) {
         this.auth = Storage.get('auth')
       } else {
         this.auth = null
+      }
+      if (this.auth) {
+        this.loadOkr()
       }
       this.overlayAll = false
     },
@@ -215,8 +232,28 @@ export default {
           .then((response) => {
             Storage.set('auth', response.data)
             this.initAuth()
+          })
+          .catch((errors) => {
+            this.err = null
+            this.err = errors
+            this.$bvToast.toast(errors, {
+              title: 'Xảy ra lỗi vui lòng đăng xuất và đăng nhập lại :(',
+              autoHideDelay: 5000,
+              variant: 'danger',
+              toaster: 'b-toaster-bottom-center'
+            })
             this.overlayAll = false
-            this.loadOkr()
+          })
+      } else {
+        var refreshToken = Storage.get('refresh_token')
+        await Service.refreshToken({ refresh_token: refreshToken })
+          .then((res) => {
+            var auth = Storage.get('auth')
+            auth.token = res.data
+            Storage.set('auth', auth)
+            Storage.set('access_token', res.data.access_token)
+            Storage.set('refresh_token', res.data.refresh_token)
+            this.initAuth()
           })
           .catch((errors) => {
             this.err = null
@@ -360,7 +397,7 @@ export default {
         })
         .catch((errors) => {
           this.toast(
-            'error',
+            'danger',
             'Cập nhật thất bại vui lòng đăng nhập lại và thử lại',
             'Update OKR'
           )
@@ -384,7 +421,7 @@ export default {
         })
         .catch((errors) => {
           this.toast(
-            'error',
+            'danger',
             'Cập nhật thất bại vui lòng đăng nhập lại và thử lại',
             'Update OKR'
           )
@@ -393,13 +430,13 @@ export default {
           this.overlayAll = false
         })
     },
-    toast (variant = null, message = null, title = null) {
+    toast (variant = null, message = null, title = null, position = 'b-toaster-bottom-center') {
       this.$bvToast.toast(message, {
         title: title,
         variant: variant,
         solid: true,
         autoHideDelay: 3000,
-        toaster: 'b-toaster-bottom-center'
+        toaster: position
       })
     },
     convertActualToValueInput (actual, target) {
@@ -438,7 +475,7 @@ export default {
         })
         .catch((errors) => {
           this.toast(
-            'error',
+            'danger',
             'Cập nhật thất bại vui lòng đăng nhập lại và thử lại',
             'Update OKR'
           )
@@ -450,6 +487,48 @@ export default {
     toggleCollapseView (index) {
       console.log(index)
       this.$root.$emit('bv::toggle::collapse', 'collapse-view-' + index)
+    },
+    getCookies (domain, name, callback) {
+      chrome.cookies.get({ url: domain, name: name }, function (cookie) {
+        if (callback) {
+          callback(cookie)
+        }
+      })
+    },
+    async loadGoalAuth () {
+      var self = this
+      this.getCookies('https://goal.sun-asterisk.vn', 'refresh_token', function (cookie) {
+        if (cookie) {
+          Storage.set('refresh_token', cookie.value)
+        }
+      })
+      this.getCookies('https://goal.sun-asterisk.vn', 'access_token', async function (cookie) {
+        if (cookie) {
+          Storage.set('access_token', cookie.value)
+          var token = Storage.get('access_token')
+          var tokenDecoded = jwtDecode(token)
+          var userId = tokenDecoded.sub
+          await Service.loadUserDetail(userId, token)
+            .then((res) => {
+              var auth = {
+                ...res.data,
+                token: {
+                  access_token: Storage.get('access_token'),
+                  refresh_token: Storage.get('refresh_token'),
+                  token_type: 'Bearer'
+                }
+              }
+              Storage.set('auth', auth)
+              self.initAuth()
+            })
+        } else {
+          self.toast(
+            'danger',
+            'Vui lòng đăng nhập lại vào SGoal và tiến hành mở extension đăng nhập lại',
+            'Đăng nhập thất bại'
+          )
+        }
+      })
     }
   }
 }
@@ -482,7 +561,7 @@ body {
 .main {
   background-color: #ffffff;
   width: 400px;
-  height: 400px;
+  height: 420px;
   margin: 7em auto;
   border-radius: 1.5em;
   box-shadow: 0px 11px 35px 2px rgba(0, 0, 0, 0.14);
@@ -556,9 +635,13 @@ form.form1 {
   padding-bottom: 10px;
   padding-top: 10px;
   font-family: "Ubuntu", sans-serif;
-  margin-left: 35%;
+  margin-left: 31%;
   font-size: 13px;
   box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
+}
+
+.submit-goal {
+  margin-left: 13% !important;
 }
 
 .forgot {

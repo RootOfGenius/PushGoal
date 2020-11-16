@@ -20,5 +20,13 @@ export default {
   loadChildObj: (idObject) => ({
     method: 'GET',
     url: '/objectives/' + idObject + '/detail_objective'
+  }),
+  loadUserDetail: (userId) => ({
+    method: 'GET',
+    url: '/users/' + userId
+  }),
+  refreshToken: (data) => ({
+    method: 'POST',
+    data: data
   })
 }
