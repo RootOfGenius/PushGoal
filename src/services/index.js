@@ -23,6 +23,7 @@ const request = async (api, token) => {
 export default {
   login: (email, password) => request(API.login(email, password), null),
   getOkr: (groupId, token) => request(API.getOkr(groupId), token),
+  loadUserDetail: (userId, token) => request(API.loadUserDetail(userId), token),
   updateOkr: (okrId, data, token) => request(API.updateOkr(okrId, data), token),
   remainUnChange: (okrId, data, token) => request(API.remainUnChange(okrId, data), token),
   loadChildObj: (objId, token) => request(API.loadChildObj(objId), token)

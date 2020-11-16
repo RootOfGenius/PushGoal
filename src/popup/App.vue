@@ -38,6 +38,14 @@
             >
               Đăng Nhập
             </button>
+            <button
+              type="button"
+              class="submit mt-2"
+              @click="loadGoalAuth()"
+              align="center"
+            >
+              Đăng Nhập with SGoal
+            </button>
           </div>
         </div>
       </div>
@@ -174,6 +182,7 @@
 import Storage from './storage'
 import Service from '../services/index'
 import countTo from 'vue-count-to'
+import jwtDecode from "jwt-decode"
 import { ZoomCenterTransition } from 'vue2-transitions'
 
 export default {
@@ -187,7 +196,11 @@ export default {
     overlayAll: false,
     err: null,
     objectives: [],
-    overlayOkr: false
+    overlayOkr: false,
+    cookie: {
+      access_token: null,
+      refresh_token: null
+    }
   }),
   computed: {},
   created () {
@@ -450,6 +463,28 @@ export default {
     toggleCollapseView (index) {
       console.log(index)
       this.$root.$emit('bv::toggle::collapse', 'collapse-view-' + index)
+    },
+    getCookies (domain, name, callback) {
+      chrome.cookies.get({'url': domain, 'name': name }, function (cookie) {
+        if (callback) {
+          callback(cookie.value)
+        }
+      })
+    },
+    async loadGoalAuth () {
+      this.getCookies('https://goal.sun-asterisk.vn', 'access_token', function (value) {
+        Storage.set('access_token', value)
+      })
+      this.getCookies('https://goal.sun-asterisk.vn', 'refresh_token', function (value) {
+        Storage.set('refresh_token', value)
+      })
+      var token = Storage.get('access_token')
+      var tokenDecoded = jwtDecode(token)
+      var userId = tokenDecoded.sub
+      await Service.loadUserDetail(userId, token)
+        .then((res) => {
+          console.log(res)
+        })
     }
   }
 }
