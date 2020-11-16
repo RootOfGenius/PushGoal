@@ -537,7 +537,7 @@ export default {
 <style>
 html {
   width: 600px;
-  height: auto;
+  height: 700px;
 }
 .block {
   background-color: #777;
