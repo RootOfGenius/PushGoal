@@ -4,14 +4,15 @@ div
     #register(v-if='!auth')
       .main
         b-img.pt-4(center='' fluid='' :src='wsmIcon' alt='WSM Icon')
-        p.sign(align='center') Đăng nhập WSM
+        p.sign(align='center') {{ $t('auth.login_wsm') }}
         .form1
-          input.un(v-model='email' type='text' align='center' placeholder='Email')
-          input.pass(v-model='password' type='password' align='center' placeholder='Mật khẩu')
-          button.submit.mt-2(type='button' @click='login()' align='center')
-            | Đăng nhập
-          button.submit.submit-goal.mt-2(type='button' @click='loadGoalAuth()' align='center')
-            | Đăng nhập với SGoal chỉ với 1 click
+          input.un(v-model='email' type='text' align='center' :placeholder="$t('auth.email')")
+          input.pass(v-model='password' type='password' align='center' :placeholder="$t('auth.password')")
+          button.submit.login-btn.mt-2(type='button' @click='login()' align='center')
+            | {{ $t('auth.login') }}
+          button.submit.login-goal-btn.submit-goal.mt-2(type='button' @click='loadGoalAuth()' align='center')
+            | {{ $t('auth.login_goal') }}
+        LocaleChanger.locale-change
     div(v-if='auth')
       b-navbar(toggleable='lg' type='dark' variant='info')
         b-navbar-brand(href='#')
@@ -23,17 +24,23 @@ div
             b-nav-item-dropdown(right='')
               template(#button-content='')
                 b-icon(icon='person-fill')
-                em Tài khoản
+                em {{ $t('auth.account') }}
               b-dropdown-item(@click='logout()')
                 b-icon(icon='power' aria-hidden='true')
-                | Đăng xuất
+                | {{ $t('auth.logout') }}
+            b-nav-item-dropdown(right='')
+              template(#button-content='')
+                b-icon(icon='flag-fill')
+                em {{ $t('common.language') }}
+              b-dropdown-item
+                LocaleChanger
       b-overlay(:show='overlayOkr' rounded='sm')
         b-container
           b-row
-            p Ghi chú trạng thái:
-            p.text-danger.ml-2 Chưa cập nhật
-            p.text-success.ml-2 Đã cập nhật
-            p.text-info.ml-2 Cập nhật dở
+            p {{ $t('status.label') }}
+            p.text-danger.ml-2 {{ $t('status.not_update') }}
+            p.text-success.ml-2 {{ $t('status.done_update') }}
+            p.text-info.ml-2 {{ $t('status.progress_update') }}
           b-row.mb-4
             span.w-100(v-for='(item, index) in objectives' :key='index')
               zoom-center-transition
@@ -56,10 +63,10 @@ div
                   b-form-input(@change='inputRangeChange(key, index, indexKey)' v-model='key.actual' type='range' min='0' max='100' step='1')
                   .flex--center
                     .w-10(v-if='key.update_status === 0')
-                      b-button(@click='remainUnChange(key, index, indexKey)' size='sm' v-b-tooltip.hover='' title='Không có thay đổi gì')
+                      b-button(@click='remainUnChange(key, index, indexKey)' size='sm' v-b-tooltip.hover='' :title='$t("okr.no_changes")')
                         b-icon(icon='clock' animation='spin-reverse' font-scale='1')
                     .w-15
-                      b-form-input(@update='valueInputChange($event, key, index, indexKey)' debounce='500' min='0' :max='key.target' :value='convertActualToValueInput(key.actual, key.target)' type='number' size='sm')
+                      b-form-input(@update='valueInputChange($event, key, index, indexKey)' debounce='1500' min='0' :max='key.target' :value='convertActualToValueInput(key.actual, key.target)' type='number' size='sm')
                     .w-20.ml-2
                       | / {{ key.target }} &nbsp; {{ key.unit.unit }}
                     .w-20.ml-2.view-comment(@click='toggleCollapseView(indexKey)')
@@ -74,11 +81,12 @@ import Storage from './storage'
 import Service from '../services/index'
 import countTo from 'vue-count-to'
 import jwtDecode from 'jwt-decode'
+import LocaleChanger from '../components/LocaleChanger'
 import { ZoomCenterTransition } from 'vue2-transitions'
 
 export default {
   name: 'App',
-  components: { countTo, ZoomCenterTransition },
+  components: { countTo, ZoomCenterTransition, LocaleChanger },
   data: () => ({
     auth: null,
     email: null,
@@ -102,7 +110,7 @@ export default {
     if (!this.auth) {
       this.toast(
         'info',
-        'Chúng tôi sẽ không lưu thông tin tài khoản wsm!',
+        this.$t('auth.notice'),
         'PushGoal',
         'b-toaster-top-center'
       )
@@ -133,7 +141,7 @@ export default {
             this.err = null
             this.err = errors
             this.$bvToast.toast(errors, {
-              title: 'Xảy ra lỗi vui lòng đăng xuất và đăng nhập lại :(',
+              title: this.$t('errors.login_again'),
               autoHideDelay: 5000,
               variant: 'danger',
               toaster: 'b-toaster-bottom-center'
@@ -155,7 +163,7 @@ export default {
             this.err = null
             this.err = errors
             this.$bvToast.toast(errors, {
-              title: 'Xảy ra lỗi vui lòng đăng xuất và đăng nhập lại :(',
+              title: this.$t('errors.login_again'),
               autoHideDelay: 5000,
               variant: 'danger',
               toaster: 'b-toaster-bottom-center'
@@ -181,7 +189,7 @@ export default {
           this.err = null
           this.err = errors
           this.$bvToast.toast(errors, {
-            title: 'Xảy ra lỗi vui lòng kiểm tra lại tài khoản :(',
+            title: this.$t('errors.login_validate'),
             autoHideDelay: 5000,
             variant: 'danger',
             toaster: 'b-toaster-bottom-center'
@@ -198,7 +206,6 @@ export default {
       this.overlayOkr = true
       await Service.getOkr(this.auth.groups[0].id, this.auth.token.access_token)
         .then((response) => {
-          console.log(response)
           this.objectives = response.data.objectives
           this.objectives = this.objectives.map((obj) => ({
             ...obj,
@@ -217,7 +224,6 @@ export default {
         var el = self.objectives[i]
         this.loadChildObj(el.id, i)
       }
-      console.log(this.objectives)
     },
     async loadChildObj (objId, index) {
       await Service.loadChildObj(objId, this.auth.token.access_token).then(
@@ -231,7 +237,6 @@ export default {
       )
     },
     formatOkr (value) {
-      console.log(value)
       return parseInt(value).toFixed(0)
     },
     formatVariant (item) {
@@ -277,25 +282,23 @@ export default {
     },
     async inputRangeChange (item, index, indexKey) {
       this.overlayAll = true
-      console.log(this.objectives[index])
       await Service.updateOkr(
         item.id,
         { actual: item.actual },
         this.auth.token.access_token
       )
         .then((response) => {
-          console.log(response)
           this.objectives[index].actual = response.data.actual
           this.objectives[index].info.update_status =
             response.data.update_status
           this.objectives[index].info.childObject[indexKey].update_status = 2
           this.objectives[index].info.progress_status = response.data.progressStatus
-          this.toast('success', 'Cập nhật thành công', 'Update OKR')
+          this.toast('success', this.$t('okr.update_success'), 'Update OKR')
         })
         .catch((errors) => {
           this.toast(
             'danger',
-            'Cập nhật thất bại vui lòng đăng nhập lại và thử lại',
+            this.$t('okr.update_fail'),
             'Update OKR'
           )
         })
@@ -314,12 +317,12 @@ export default {
           this.objectives[index].info.update_status =
             res.objective.update_status
           this.objectives[index].info.childObject[indexKey].update_status = 2
-          this.toast('success', 'Cập nhật thành công', 'Update OKR')
+          this.toast('success', this.$t('okr.update_success'), 'Update OKR')
         })
         .catch((errors) => {
           this.toast(
             'danger',
-            'Cập nhật thất bại vui lòng đăng nhập lại và thử lại',
+            this.$t('okr.update_fail'),
             'Update OKR'
           )
         })
@@ -353,7 +356,6 @@ export default {
       if (isNaN(parseInt(value))) {
         actual = 0
       }
-      console.log(parseInt(value))
       this.overlayAll = true
       item.actual = actual
       await Service.updateOkr(
@@ -362,18 +364,17 @@ export default {
         this.auth.token.access_token
       )
         .then((response) => {
-          console.log(response)
           this.objectives[index].actual = response.data.actual
           this.objectives[index].info.update_status =
             response.data.update_status
           this.objectives[index].info.childObject[indexKey].update_status = 2
           this.objectives[index].info.progress_status = response.data.progressStatus
-          this.toast('success', 'Cập nhật thành công', 'Update OKR')
+          this.toast('success', this.$t('okr.update_success'), 'Update OKR')
         })
         .catch((errors) => {
           this.toast(
             'danger',
-            'Cập nhật thất bại vui lòng đăng nhập lại và thử lại',
+            this.$t('okr.update_fail'),
             'Update OKR'
           )
         })
@@ -382,7 +383,6 @@ export default {
         })
     },
     toggleCollapseView (index) {
-      console.log(index)
       this.$root.$emit('bv::toggle::collapse', 'collapse-view-' + index)
     },
     getCookies (domain, name, callback) {
@@ -418,11 +418,18 @@ export default {
               Storage.set('auth', auth)
               self.initAuth()
             })
+            .catch((err) => {
+              self.toast(
+                'danger',
+                self.$t('errors.login_goal'),
+                self.$t('auth.fail')
+              )
+            })
         } else {
           self.toast(
             'danger',
-            'Vui lòng đăng nhập lại vào SGoal và tiến hành mở extension đăng nhập lại',
-            'Đăng nhập thất bại'
+            self.$t('errors.login_goal'),
+            self.$t('auth.fail')
           )
         }
       })
@@ -462,6 +469,13 @@ body {
   margin: 7em auto;
   border-radius: 1.5em;
   box-shadow: 0px 11px 35px 2px rgba(0, 0, 0, 0.14);
+  position: relative;
+}
+
+.locale-change {
+  position: absolute;
+  top: 5%;
+  right: 10%;
 }
 
 .sign {
@@ -532,9 +546,24 @@ form.form1 {
   padding-bottom: 10px;
   padding-top: 10px;
   font-family: "Ubuntu", sans-serif;
-  margin-left: 31%;
   font-size: 13px;
   box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
+}
+
+.login-btn {
+  margin: 0;
+  position: absolute;
+  top: 75%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.login-goal-btn {
+  margin: 0;
+  position: absolute;
+  top: 87%;
+  left: 38%;
+  transform: translate(-50%, -50%);
 }
 
 .submit-goal {
@@ -601,5 +630,11 @@ a {
 
 .card-top {
   padding: 0 1rem !important;
+}
+
+.flag-icon {
+  width: 2.333333em !important;
+  line-height: 1.5em !important;
+  cursor: pointer;
 }
 </style>
