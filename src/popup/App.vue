@@ -1,177 +1,72 @@
-<template>
-  <div>
-    <b-overlay :show="overlayAll" rounded="sm">
-      <div id="register" v-if="!auth">
-        <div class="main">
-          <b-img
-            class="pt-4"
-            center
-            fluid
-            src="https://wsm.sun-asterisk.vn/assets/favicon-f5af8f552a74be08d01600a646dde818d60113e473607c8183c49c2ec0581528.ico"
-            alt="Image 1"
-          ></b-img>
-          <p class="sign" align="center">Đăng nhập WSM</p>
-          <div class="form1">
-            <input
-              class="un"
-              v-model="email"
-              type="text"
-              align="center"
-              placeholder="Email"
-            />
-            <input
-              class="pass"
-              v-model="password"
-              type="password"
-              align="center"
-              placeholder="Mật khẩu"
-            />
-            <button
-              type="button"
-              class="submit mt-2"
-              @click="login()"
-              align="center"
-            >
-              Đăng Nhập
-            </button>
-            <button
-              type="button"
-              class="submit submit-goal mt-2"
-              @click="loadGoalAuth()"
-              align="center"
-            >
-              Đăng Nhập with SGoal chỉ với 1 click
-            </button>
-          </div>
-        </div>
-      </div>
-      <div v-if="auth">
-        <b-navbar toggleable="lg" type="dark" variant="info">
-          <b-navbar-brand href="#">
-            {{ auth.name }}
-            <b-avatar :src="auth.avatar" />
-          </b-navbar-brand>
-          <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
-          <b-collapse id="nav-collapse" is-nav>
-            <b-navbar-nav class="ml-auto">
-              <b-nav-item-dropdown right>
-                <template #button-content>
-                  <b-icon icon="person-fill"></b-icon> <em>Tài khoản</em>
-                </template>
-                <b-dropdown-item @click="logout()"
-                  ><b-icon icon="power" aria-hidden="true"></b-icon> Đăng
-                  xuất</b-dropdown-item
-                >
-              </b-nav-item-dropdown>
-            </b-navbar-nav>
-          </b-collapse>
-        </b-navbar>
-        <b-overlay :show="overlayOkr" rounded="sm">
-          <b-container>
-            <b-row>
-              <p>Ghi chú trạng thái :</p>
-              <p class="text-danger ml-2">Chưa cập nhật</p>
-              <p class="text-success ml-2">Đã cập nhật</p>
-              <p class="text-info ml-2">Cập nhật dở</p>
-            </b-row>
-            <b-row class="mb-4">
-              <span v-for="(item, index) in objectives" class="w-100" :key="index">
-                <zoom-center-transition>
-                  <b-button
-                    v-if="item.info"
-                    v-b-toggle="'collapse-' + index"
-                    class="mt-1"
-                    block
-                    :variant="formatVariantStatusUpdate(item.info.update_status)"
-                  >
-                    + {{ item.name }} &nbsp;
-                    <b-badge variant="warning">
-                      <countTo :startVal='0' :endVal='parseInt(formatOkr(item.actual))' :duration='1500'></countTo>
-                      %</b-badge>
-                    &nbsp;
-                    <b-badge
-                      :variant="
-                        formatProgressObjectives(item.info.progress_status[1])
-                      "
-                      >{{ item.info.progress_status[0] }}</b-badge
-                    >
-                  </b-button>
-                </zoom-center-transition>
-                <b-collapse
-                  :id="'collapse-' + index"
-                  v-if="item.info && item.info.childObject"
-                >
-                  <b-card
-                    v-for="(key, indexKey) in item.info.childObject"
-                    :key="indexKey"
-                    class="mt-2 font-mn"
-                    variant="outline-secondary"
-                    ><b-icon icon="bullseye"></b-icon> {{ key.name }}
-                    <b-badge variant="success">{{
-                      formatOkr(key.actual)
-                    }}%</b-badge>
-                    <b-progress max="100" height="2rem">
-                      <b-progress-bar
-                        :value="key.actual"
-                        :variant="formatVariant(key.actual)"
-                        class="mt-1"
-                      >
-                        <strong>{{ formatOkr(key.actual) }}% / 100%</strong>
-                      </b-progress-bar>
-                    </b-progress>
-                    <b-form-input
-                      @change="inputRangeChange(key, index, indexKey)"
-                      v-model="key.actual"
-                      type="range"
-                      min="0"
-                      max="100"
-                      step="1"
-                    ></b-form-input>
-                    <div class="flex--center">
-                      <div class="w-10" v-if="key.update_status === 0">
-                        <b-button
-                          @click="remainUnChange(key, index, indexKey)"
-                          size="sm"
-                          v-b-tooltip.hover
-                          title="Không có thay đổi gì"
-                        >
-                          <b-icon
-                            icon="clock"
-                            animation="spin-reverse"
-                            font-scale="1"
-                          ></b-icon>
-                        </b-button>
-                      </div>
-                      <div class="w-15">
-                        <b-form-input @update="valueInputChange($event, key, index, indexKey)" debounce="500" min="0" :max="key.target" :value="convertActualToValueInput(key.actual, key.target)" type="number" size="sm" />
-                      </div>
-                      <div class="w-20 ml-2">
-                        / {{ key.target }} &nbsp; {{ key.unit.unit }}
-                      </div>
-                      <div class="w-20 ml-2 view-comment" @click="toggleCollapseView(indexKey)">
-                        View Comments ({{ key.comments.length }})
-                      </div>
-                    </div>
-                    <b-collapse :id="'collapse-view-' + indexKey">
-                      <b-card
-                        v-for="(comment, indexComment) in key.comments"
-                        :key="indexComment"
-                        class="mt-2 card-top"
-                        no-body
-                        variant="outline-secondary"
-                        >
-                        <span class="font-mm">{{ comment.content }}</span>
-                      </b-card>
-                    </b-collapse>
-                  </b-card>
-                </b-collapse>
-              </span>
-            </b-row>
-          </b-container>
-        </b-overlay>
-      </div>
-    </b-overlay>
-  </div>
+<template lang='pug'>
+div
+  b-overlay(:show='overlayAll' rounded='sm')
+    #register(v-if='!auth')
+      .main
+        b-img.pt-4(center='' fluid='' :src='wsmIcon' alt='WSM Icon')
+        p.sign(align='center') Đăng nhập WSM
+        .form1
+          input.un(v-model='email' type='text' align='center' placeholder='Email')
+          input.pass(v-model='password' type='password' align='center' placeholder='Mật khẩu')
+          button.submit.mt-2(type='button' @click='login()' align='center')
+            | Đăng nhập
+          button.submit.submit-goal.mt-2(type='button' @click='loadGoalAuth()' align='center')
+            | Đăng nhập với SGoal chỉ với 1 click
+    div(v-if='auth')
+      b-navbar(toggleable='lg' type='dark' variant='info')
+        b-navbar-brand(href='#')
+          | {{ auth.name }}
+          b-avatar(:src='auth.avatar')
+        b-navbar-toggle(target='nav-collapse')
+        b-collapse#nav-collapse(is-nav='')
+          b-navbar-nav.ml-auto
+            b-nav-item-dropdown(right='')
+              template(#button-content='')
+                b-icon(icon='person-fill')
+                em Tài khoản
+              b-dropdown-item(@click='logout()')
+                b-icon(icon='power' aria-hidden='true')
+                | Đăng xuất
+      b-overlay(:show='overlayOkr' rounded='sm')
+        b-container
+          b-row
+            p Ghi chú trạng thái:
+            p.text-danger.ml-2 Chưa cập nhật
+            p.text-success.ml-2 Đã cập nhật
+            p.text-info.ml-2 Cập nhật dở
+          b-row.mb-4
+            span.w-100(v-for='(item, index) in objectives' :key='index')
+              zoom-center-transition
+                b-button.mt-1(v-if='item.info' v-b-toggle="'collapse-' + index" block='' :variant='formatVariantStatusUpdate(item.info.update_status)')
+                  | + {{ item.name }} &nbsp;
+                  b-badge(variant='warning')
+                    countTo(:start-val='0' :end-val='parseInt(formatOkr(item.actual))' :duration='1500')
+                    | %
+                  | &nbsp;
+                  b-badge(:variant='formatProgressObjectives(item.info.progress_status[1])') {{ item.info.progress_status[0] }}
+              b-collapse(:id="'collapse-' + index" v-if='item.info && item.info.childObject')
+                b-card.mt-2.font-mn(v-for='(key, indexKey) in item.info.childObject' :key='indexKey' variant='outline-secondary')
+                  b-icon(icon='bullseye')
+                  |  {{ key.name }}
+                  b-badge(variant='success')
+                    | {{ formatOkr(key.actual) }}%
+                  b-progress(max='100' height='2rem')
+                    b-progress-bar.mt-1(:value='key.actual' :variant='formatVariant(key.actual)')
+                      strong {{ formatOkr(key.actual) }}% / 100%
+                  b-form-input(@change='inputRangeChange(key, index, indexKey)' v-model='key.actual' type='range' min='0' max='100' step='1')
+                  .flex--center
+                    .w-10(v-if='key.update_status === 0')
+                      b-button(@click='remainUnChange(key, index, indexKey)' size='sm' v-b-tooltip.hover='' title='Không có thay đổi gì')
+                        b-icon(icon='clock' animation='spin-reverse' font-scale='1')
+                    .w-15
+                      b-form-input(@update='valueInputChange($event, key, index, indexKey)' debounce='500' min='0' :max='key.target' :value='convertActualToValueInput(key.actual, key.target)' type='number' size='sm')
+                    .w-20.ml-2
+                      | / {{ key.target }} &nbsp; {{ key.unit.unit }}
+                    .w-20.ml-2.view-comment(@click='toggleCollapseView(indexKey)')
+                      | View Comments ({{ key.comments.length }})
+                  b-collapse(:id="'collapse-view-' + indexKey")
+                    b-card.mt-2.card-top(v-for='(comment, indexComment) in key.comments' :key='indexComment' no-body='' variant='outline-secondary')
+                      span.font-mm {{ comment.content }}
 </template>
 
 <script>
@@ -196,7 +91,8 @@ export default {
     cookie: {
       access_token: null,
       refresh_token: null
-    }
+    },
+    wsmIcon: 'https://wsm.sun-asterisk.vn/assets/favicon-f5af8f552a74be08d01600a646dde818d60113e473607c8183c49c2ec0581528.ico'
   }),
   computed: {},
   created () {
@@ -335,6 +231,7 @@ export default {
       )
     },
     formatOkr (value) {
+      console.log(value)
       return parseInt(value).toFixed(0)
     },
     formatVariant (item) {
