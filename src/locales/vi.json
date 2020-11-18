@@ -1,0 +1,32 @@
+{
+  "auth": {
+    "login_wsm": "Đăng nhập WSM",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "login": "Đăng nhập",
+    "login_goal":"Đăng nhập với SGoal chỉ với 1 click",
+    "notice": "Chúng tôi sẽ không lưu thông tin tài khoản wsm!",
+    "account": "Tài khoản",
+    "logout": "Đăng xuất",
+    "fail": "Đăng nhập thất bại"
+  },
+  "status": {
+    "label": "Ghi chú trạng thái",
+    "not_update": "Chưa cập nhật",
+    "done_update": "Đã cập nhật",
+    "progress_update": "Cập nhật dở"
+  },
+  "common": {
+    "language": "Ngôn ngữ"
+  },
+  "okr": {
+    "no_changes": "Không có thay đổi gì",
+    "update_success": "Cập nhật thành công",
+    "update_fail": "Cập nhật thất bại vui lòng đăng nhập lại và thử lại"
+  },
+  "errors": {
+    "login_again": "Xảy ra lỗi vui lòng đăng xuất và đăng nhập lại :(",
+    "login_validate": "Xảy ra lỗi vui lòng kiểm tra lại tài khoản :(",
+    "login_goal": "Vui lòng đăng nhập lại vào SGoal và tiến hành mở extension đăng nhập lại"
+  }
+}

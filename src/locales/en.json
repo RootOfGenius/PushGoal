@@ -1,0 +1,32 @@
+{
+  "auth": {
+    "login_wsm": "Login WSM",
+    "email": "Email",
+    "password": "Password",
+    "login": "Login",
+    "login_goal":"Login SGoal with 1 click",
+    "notice": "We will not save wsm account information!",
+    "account": "Account",
+    "logout": "Logout",
+    "fail": "Login Failed !"
+  },
+  "status": {
+    "label": "Status",
+    "not_update": "Not updated",
+    "done_update": "Done updated",
+    "progress_update": "Progress updated"
+  },
+  "common": {
+    "language": "Languages"
+  },
+  "okr": {
+    "no_changes": "Remain un change",
+    "update_success": "Updated successfully",
+    "update_fail": "Update failed please login again and try again"
+  },
+  "errors": {
+    "login_again": "An error occurred, please log out and log in again :(",
+    "login_validate": "An error occurred, please check your account :(",
+    "login_goal": "Please log back into SGoal and proceed to open the login extension again"
+  }
+}
