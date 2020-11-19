@@ -22,7 +22,8 @@
   "okr": {
     "no_changes": "Remain un change",
     "update_success": "Updated successfully",
-    "update_fail": "Update failed please login again and try again"
+    "update_fail": "Update failed please login again and try again",
+    "view_comments": "View Comments"
   },
   "errors": {
     "login_again": "An error occurred, please log out and log in again :(",

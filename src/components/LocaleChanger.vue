@@ -5,6 +5,8 @@
 </template>
 
 <script>
+import Storage from '../popup/storage'
+
 export default {
   name: 'locale-changer',
   data () {
@@ -18,6 +20,7 @@ export default {
   methods: {
     setLocale (value) {
       this.$i18n.locale = value
+      Storage.set('locale', value)
     }
   }
 }

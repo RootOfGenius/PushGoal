@@ -22,7 +22,8 @@
   "okr": {
     "no_changes": "Không có thay đổi gì",
     "update_success": "Cập nhật thành công",
-    "update_fail": "Cập nhật thất bại vui lòng đăng nhập lại và thử lại"
+    "update_fail": "Cập nhật thất bại vui lòng đăng nhập lại và thử lại",
+    "view_comments": "Xem bình luận"
   },
   "errors": {
     "login_again": "Xảy ra lỗi vui lòng đăng xuất và đăng nhập lại :(",

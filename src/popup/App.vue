@@ -1,79 +1,81 @@
 <template lang='pug'>
 div
   b-overlay(:show='overlayAll' rounded='sm')
-    #register(v-if='!auth')
-      .main
-        b-img.pt-4(center='' fluid='' :src='wsmIcon' alt='WSM Icon')
-        p.sign(align='center') {{ $t('auth.login_wsm') }}
-        .form1
-          input.un(v-model='email' type='text' align='center' :placeholder="$t('auth.email')")
-          input.pass(v-model='password' type='password' align='center' :placeholder="$t('auth.password')")
-          button.submit.login-btn.mt-2(type='button' @click='login()' align='center')
-            | {{ $t('auth.login') }}
-          button.submit.login-goal-btn.submit-goal.mt-2(type='button' @click='loadGoalAuth()' align='center')
-            | {{ $t('auth.login_goal') }}
-        LocaleChanger.locale-change
-    div(v-if='auth')
-      b-navbar(toggleable='lg' type='dark' variant='info')
-        b-navbar-brand(href='#')
-          | {{ auth.name }}
-          b-avatar(:src='auth.avatar')
-        b-navbar-toggle(target='nav-collapse')
-        b-collapse#nav-collapse(is-nav='')
-          b-navbar-nav.ml-auto
-            b-nav-item-dropdown(right='')
-              template(#button-content='')
-                b-icon(icon='person-fill')
-                em {{ $t('auth.account') }}
-              b-dropdown-item(@click='logout()')
-                b-icon(icon='power' aria-hidden='true')
-                | {{ $t('auth.logout') }}
-            b-nav-item-dropdown(right='')
-              template(#button-content='')
-                b-icon(icon='flag-fill')
-                em {{ $t('common.language') }}
-              b-dropdown-item
-                LocaleChanger
-      b-overlay(:show='overlayOkr' rounded='sm')
-        b-container
-          b-row
-            p {{ $t('status.label') }}
-            p.text-danger.ml-2 {{ $t('status.not_update') }}
-            p.text-success.ml-2 {{ $t('status.done_update') }}
-            p.text-info.ml-2 {{ $t('status.progress_update') }}
-          b-row.mb-4
-            span.w-100(v-for='(item, index) in objectives' :key='index')
-              zoom-center-transition
-                b-button.mt-1(v-if='item.info' v-b-toggle="'collapse-' + index" block='' :variant='formatVariantStatusUpdate(item.info.update_status)')
-                  | + {{ item.name }} &nbsp;
-                  b-badge(variant='warning')
-                    countTo(:start-val='0' :end-val='parseInt(formatOkr(item.actual))' :duration='1500')
-                    | %
-                  | &nbsp;
-                  b-badge(:variant='formatProgressObjectives(item.info.progress_status[1])') {{ item.info.progress_status[0] }}
-              b-collapse(:id="'collapse-' + index" v-if='item.info && item.info.childObject')
-                b-card.mt-2.font-mn(v-for='(key, indexKey) in item.info.childObject' :key='indexKey' variant='outline-secondary')
-                  b-icon(icon='bullseye')
-                  |  {{ key.name }}
-                  b-badge(variant='success')
-                    | {{ formatOkr(key.actual) }}%
-                  b-progress(max='100' height='2rem')
-                    b-progress-bar.mt-1(:value='key.actual' :variant='formatVariant(key.actual)')
-                      strong {{ formatOkr(key.actual) }}% / 100%
-                  b-form-input(@change='inputRangeChange(key, index, indexKey)' v-model='key.actual' type='range' min='0' max='100' step='1')
-                  .flex--center
-                    .w-10(v-if='key.update_status === 0')
-                      b-button(@click='remainUnChange(key, index, indexKey)' size='sm' v-b-tooltip.hover='' :title='$t("okr.no_changes")')
-                        b-icon(icon='clock' animation='spin-reverse' font-scale='1')
-                    .w-15
-                      b-form-input(@update='valueInputChange($event, key, index, indexKey)' debounce='1500' min='0' :max='key.target' :value='convertActualToValueInput(key.actual, key.target)' type='number' size='sm')
-                    .w-20.ml-2
-                      | / {{ key.target }} &nbsp; {{ key.unit.unit }}
-                    .w-20.ml-2.view-comment(@click='toggleCollapseView(indexKey)')
-                      | View Comments ({{ key.comments.length }})
-                  b-collapse(:id="'collapse-view-' + indexKey")
-                    b-card.mt-2.card-top(v-for='(comment, indexComment) in key.comments' :key='indexComment' no-body='' variant='outline-secondary')
-                      span.font-mm {{ comment.content }}
+    slide-y-down-transition(:delay='200')
+      #register(v-if='!auth')
+        .main
+          b-img.pt-4(center='' fluid='' :src='wsmIcon' alt='WSM Icon')
+          p.sign(align='center') {{ $t('auth.login_wsm') }}
+          .form1
+            input.un(v-model='email' type='text' align='center' :placeholder="$t('auth.email')")
+            input.pass(v-model='password' type='password' align='center' :placeholder="$t('auth.password')")
+            button.submit.login-btn.btn-hover.color-7.mt-2(type='button' @click='login()' align='center')
+              | {{ $t('auth.login') }}
+            button.submit.btn-hover.color-9.login-goal-btn.submit-goal.mt-2(type='button' @click='loadGoalAuth()' align='center')
+              | {{ $t('auth.login_goal') }}
+          LocaleChanger.locale-change
+    slide-y-down-transition(:delay='200')
+      div(v-if='auth')
+        b-navbar(toggleable='lg' type='dark' variant='info')
+          b-navbar-brand(href='#')
+            | {{ auth.name }}
+            b-avatar(:src='auth.avatar')
+          b-navbar-toggle(target='nav-collapse')
+          b-collapse#nav-collapse(is-nav='')
+            b-navbar-nav.ml-auto
+              b-nav-item-dropdown(right='')
+                template(#button-content='')
+                  b-icon(icon='person-fill')
+                  em {{ $t('auth.account') }}
+                b-dropdown-item(@click='logout()')
+                  b-icon(icon='power' aria-hidden='true')
+                  | {{ $t('auth.logout') }}
+              b-nav-item-dropdown(right='')
+                template(#button-content='')
+                  b-icon(icon='flag-fill')
+                  em {{ $t('common.language') }}
+                b-dropdown-item
+                  LocaleChanger
+        b-overlay(:show='overlayOkr' rounded='sm')
+          b-container
+            b-row
+              p {{ $t('status.label') }}
+              p.text-danger.ml-2 {{ $t('status.not_update') }}
+              p.text-success.ml-2 {{ $t('status.done_update') }}
+              p.text-info.ml-2 {{ $t('status.progress_update') }}
+            b-row.mb-4
+              span.w-100(v-for='(item, index) in objectives' :key='index')
+                zoom-center-transition
+                  b-button.mt-1(v-if='item.info' v-b-toggle="'collapse-' + index" block='' :variant='formatVariantStatusUpdate(item.info.update_status)')
+                    | + {{ item.name }} &nbsp;
+                    b-badge(variant='warning')
+                      countTo(:start-val='0' :end-val='parseInt(formatOkr(item.actual))' :duration='1500')
+                      | %
+                    | &nbsp;
+                    b-badge(:variant='formatProgressObjectives(item.info.progress_status[1])') {{ item.info.progress_status[0] }}
+                b-collapse(:id="'collapse-' + index" v-if='item.info && item.info.childObject')
+                  b-card.mt-2.font-mn(v-for='(key, indexKey) in item.info.childObject' :key='indexKey' variant='outline-secondary')
+                    b-icon(icon='bullseye')
+                    |  {{ key.name }} &nbsp;
+                    b-badge(variant='success')
+                      | {{ formatOkr(key.actual) }}%
+                    b-progress(max='100' height='2rem')
+                      b-progress-bar.mt-1(:value='key.actual' :variant='formatVariant(key.actual)')
+                        strong {{ formatOkr(key.actual) }}% / 100%
+                    b-form-input(@change='inputRangeChange(key, index, indexKey)' v-model='key.actual' type='range' min='0' max='100' step='1')
+                    .flex--center
+                      .w-10(v-if='key.update_status === 0')
+                        b-button(@click='remainUnChange(key, index, indexKey)' size='sm' v-b-tooltip.hover='' :title='$t("okr.no_changes")')
+                          b-icon(icon='clock' animation='spin-reverse' font-scale='1')
+                      .w-15
+                        b-form-input(@update='valueInputChange($event, key, index, indexKey)' debounce='1500' min='0' :max='key.target' :value='convertActualToValueInput(key.actual, key.target)' type='number' size='sm')
+                      .w-20.ml-2
+                        | / {{ key.target }} &nbsp; {{ key.unit.unit }}
+                      .w-20.ml-2.view-comment(@click='toggleCollapseView(indexKey)')
+                        | {{ $t('okr.view_comments') }} ({{ key.comments.length }})
+                    b-collapse(:id="'collapse-view-' + indexKey")
+                      b-card.mt-2.card-top(v-for='(comment, indexComment) in key.comments' :key='indexComment' no-body='' variant='outline-secondary')
+                        span.font-mm {{ comment.content }}
 </template>
 
 <script>
@@ -82,11 +84,11 @@ import Service from '../services/index'
 import countTo from 'vue-count-to'
 import jwtDecode from 'jwt-decode'
 import LocaleChanger from '../components/LocaleChanger'
-import { ZoomCenterTransition } from 'vue2-transitions'
+import { SlideYDownTransition, ZoomCenterTransition } from 'vue2-transitions'
 
 export default {
   name: 'App',
-  components: { countTo, ZoomCenterTransition, LocaleChanger },
+  components: { countTo, SlideYDownTransition, ZoomCenterTransition, LocaleChanger },
   data: () => ({
     auth: null,
     email: null,
@@ -104,8 +106,6 @@ export default {
   }),
   computed: {},
   created () {
-  },
-  mounted () {
     this.initAuth()
     if (!this.auth) {
       this.toast(
@@ -115,6 +115,8 @@ export default {
         'b-toaster-top-center'
       )
     }
+  },
+  mounted () {
   },
   methods: {
     initAuth: function () {
@@ -343,8 +345,7 @@ export default {
       return (target / 100 * actual).toFixed(0)
     },
     async valueInputChange (value, item, index, indexKey) {
-      var actual = parseInt(parseInt(value) * 100 / item.target).toFixed(0)
-
+      var actual = value * 100 / item.target
       if (value < 0) {
         actual = 0
       }
@@ -437,204 +438,3 @@ export default {
   }
 }
 </script>
-
-<style>
-html {
-  width: 600px;
-  height: 700px;
-}
-.block {
-  background-color: #777;
-  color: white;
-  cursor: pointer;
-  padding: 18px;
-  width: 100%;
-  border: none;
-  text-align: left;
-  outline: none;
-  font-size: 15px;
-}
-.font-mn {
-  font-size: 0.8em !important;
-}
-body {
-  background-color: #f3ebf6;
-  font-family: "Ubuntu", sans-serif;
-}
-
-.main {
-  background-color: #ffffff;
-  width: 400px;
-  height: 420px;
-  margin: 7em auto;
-  border-radius: 1.5em;
-  box-shadow: 0px 11px 35px 2px rgba(0, 0, 0, 0.14);
-  position: relative;
-}
-
-.locale-change {
-  position: absolute;
-  top: 5%;
-  right: 10%;
-}
-
-.sign {
-  padding-top: 40px;
-  color: #8c55aa;
-  font-family: "Ubuntu", sans-serif;
-  font-weight: bold;
-  font-size: 23px;
-}
-
-.un {
-  width: 76%;
-  color: rgb(38, 50, 56);
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 1px;
-  background: rgba(136, 126, 126, 0.04);
-  padding: 10px 20px;
-  border: none;
-  border-radius: 20px;
-  outline: none;
-  box-sizing: border-box;
-  border: 2px solid rgba(0, 0, 0, 0.02);
-  margin-bottom: 50px;
-  margin-left: 46px;
-  text-align: center;
-  margin-bottom: 27px;
-  font-family: "Ubuntu", sans-serif;
-}
-
-form.form1 {
-  padding-top: 40px;
-}
-
-.pass {
-  width: 76%;
-  color: rgb(38, 50, 56);
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 1px;
-  background: rgba(136, 126, 126, 0.04);
-  padding: 10px 20px;
-  border: none;
-  border-radius: 20px;
-  outline: none;
-  box-sizing: border-box;
-  border: 2px solid rgba(0, 0, 0, 0.02);
-  margin-bottom: 50px;
-  margin-left: 46px;
-  text-align: center;
-  margin-bottom: 0px;
-  font-family: "Ubuntu", sans-serif;
-}
-
-.un:focus,
-.pass:focus {
-  border: 2px solid rgba(0, 0, 0, 0.18) !important;
-}
-
-.submit {
-  cursor: pointer;
-  border-radius: 5em;
-  color: #fff;
-  background: linear-gradient(to right, #9c27b0, #e040fb);
-  border: 0;
-  padding-left: 40px;
-  padding-right: 40px;
-  padding-bottom: 10px;
-  padding-top: 10px;
-  font-family: "Ubuntu", sans-serif;
-  font-size: 13px;
-  box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
-}
-
-.login-btn {
-  margin: 0;
-  position: absolute;
-  top: 75%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.login-goal-btn {
-  margin: 0;
-  position: absolute;
-  top: 87%;
-  left: 38%;
-  transform: translate(-50%, -50%);
-}
-
-.submit-goal {
-  margin-left: 13% !important;
-}
-
-.forgot {
-  text-shadow: 0px 0px 3px rgba(117, 117, 117, 0.12);
-  color: #e1bee7;
-  padding-top: 15px;
-}
-
-a {
-  text-shadow: 0px 0px 3px rgba(117, 117, 117, 0.12);
-  color: #e1bee7;
-  text-decoration: none;
-}
-.m-badge {
-  background: #eaeaea;
-  color: #444;
-  font-size: 0.8rem;
-  line-height: 20px;
-  min-height: 20px;
-  min-width: 20px;
-  vertical-align: middle;
-  text-align: center;
-  display: inline-block;
-  padding: 0 3px;
-  border-radius: 0.75rem;
-}
-.m-badge.m-badge--info {
-  background-color: #36a3f7;
-  color: #fff;
-}
-.w-10 {
-  width: 10%;
-}
-
-.w-15 {
-  width: 15%;
-}
-
-.w-20 {
-  widows: 20%;
-}
-
-.w-40 {
-  widows: 40%;
-}
-
-.flex--center {
-  display: flex;
-  align-items: center;
-}
-
-.view-comment {
-  color: #36a3f7;
-  cursor: pointer;
-}
-
-.font-mm {
-  font-size: 15pt;
-}
-
-.card-top {
-  padding: 0 1rem !important;
-}
-
-.flag-icon {
-  width: 2.333333em !important;
-  line-height: 1.5em !important;
-  cursor: pointer;
-}
-</style>
