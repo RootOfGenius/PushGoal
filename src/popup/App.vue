@@ -132,7 +132,9 @@ export default {
       this.overlayAll = false
     },
     async refreshAuth () {
+      console.log('Refresh auth called')
       if (Storage.get('wsm_account')) {
+        console.log('Refresh auth with wsm')
         var account = Storage.get('wsm_account')
         await Service.login(account.email, account.password)
           .then((response) => {
@@ -151,27 +153,8 @@ export default {
             this.overlayAll = false
           })
       } else {
-        var refreshToken = Storage.get('refresh_token')
-        await Service.refreshToken({ refresh_token: refreshToken })
-          .then((res) => {
-            var auth = Storage.get('auth')
-            auth.token = res.data
-            Storage.set('auth', auth)
-            Storage.set('access_token', res.data.access_token)
-            Storage.set('refresh_token', res.data.refresh_token)
-            this.initAuth()
-          })
-          .catch((errors) => {
-            this.err = null
-            this.err = errors
-            this.$bvToast.toast(errors, {
-              title: this.$t('errors.login_again'),
-              autoHideDelay: 5000,
-              variant: 'danger',
-              toaster: 'b-toaster-bottom-center'
-            })
-            this.overlayAll = false
-          })
+        console.log('Refresh auth with cookie')
+        this.loadGoalAuth()
       }
     },
     async login () {
