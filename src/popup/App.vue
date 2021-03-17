@@ -71,11 +71,6 @@ div
                         b-form-input(@update='valueInputChange($event, key, index, indexKey)' debounce='1500' min='0' :max='key.target' :value='convertActualToValueInput(key.actual, key.target)' type='number' size='sm')
                       .w-20.ml-2
                         | / {{ key.target }} &nbsp; {{ key.unit.unit }}
-                      .w-20.ml-2.view-comment(@click='toggleCollapseView(indexKey)')
-                        | {{ $t('okr.view_comments') }} ({{ key.comments.length }})
-                    b-collapse(:id="'collapse-view-' + indexKey")
-                      b-card.mt-2.card-top(v-for='(comment, indexComment) in key.comments' :key='indexComment' no-body='' variant='outline-secondary')
-                        span.font-mm {{ comment.content }}
 </template>
 
 <script>
